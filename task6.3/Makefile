@@ -2,38 +2,28 @@ CC=gcc
 
 CFLAGS= -Wall -Werror -Wextra
 
-SRC=main.c error/error.c function_phone_book/function.c phone_book/phone_book.c
+SRC=main.c operation.c parser.c
 
-TARGET=phone_book.out
+SRC_DYNAMIC= ./operation/add.c ./operation/diff.c ./operation/mult.c ./operation/divis.c
 
-LIB_SRC=error/error.c function_phone_book/function.c phone_book/phone_book.c
-
-STATIC_LIB_NAME=libphonebook.a
-
-DYNAMIC_LIB_NAME=libphonebook.so
+TARGET=main
 
 all: build
 
 build:
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
 
-build_static: static_lib
-	$(CC) $(CFLAGS) main.c -o $(TARGET) -L. $(STATIC_LIB_NAME)
+build_dynamic: build_lib
+	$(CC) $(CFLAGS) $(SRC)
 
-static_lib: obj_static
-	ar rcs $(STATIC_LIB_NAME) *.o
+build_lib: obj
+	$(CC) -shared -o libadd.so add.o
+	$(CC) -shared -o libdiff.so diff.o
+	$(CC) -shared -o libmult.so mult.o
+	$(CC) -shared -o libdivis.so divis.o
 
-obj_static:
-	$(CC) $(CFLAGS) -c $(LIB_SRC)
-
-build_dynamic: dynamic_lib
-	$(CC) $(CFLAGS) main.c -o $(TARGET) -L. -lphonebook && export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
-
-dynamic_lib: obj_dynamic
-	$(CC) -shared -o $(DYNAMIC_LIB_NAME) *.o
-
-obj_dynamic:
-	$(CC) $(CFLAGS) -fPIC -c $(LIB_SRC)
+obj:
+	$(CC) $(CFLAGS) -fPIC -c $(SRC_DYNAMIC)
 
 clean:
-	rm -rf $(TARGET) *.a *.so *.o
+	rm -rf $(TARGET) *.out *.o *.so
